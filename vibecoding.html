@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바이브코딩 기획서 도구</title>
+<style>
+  :root{
+    --ink:#14181F;
+    --gray-700:#4B5563;
+    --gray-500:#6B7280;
+    --gray-300:#E5E9F0;
+    --gray-100:#F5F7FA;
+
+    --blue:#2454C7;
+    --blue-tint:#EEF3FF;
+    --blue-border:#D6E1FA;
+
+    --green:#12805C;
+    --green-tint:#E9F7F1;
+    --green-border:#CDEBDE;
+
+    --orange:#B5541D;
+    --orange-tint:#FDF3E9;
+    --orange-border:#F5DCC0;
+
+    --red:#B23A3A;
+    --red-tint:#FCEEEE;
+    --red-border:#F3CFCF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:"Noto Sans CJK KR","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(600px 380px at 100% -8%, #EAF0FF 0%, rgba(234,240,255,0) 70%),
+      radial-gradient(520px 360px at -6% 108%, #EEFBF5 0%, rgba(238,251,245,0) 70%),
+      #FBFCFE;
+    min-height:100%;
+  }
+  .wrap{max-width:1320px;margin:0 auto;padding:36px 32px 60px 32px;}
+
+  header{margin-bottom:26px;}
+  header .eyebrow{color:var(--blue);font-weight:700;font-size:14px;margin-bottom:8px;}
+  header h1{font-size:28px;font-weight:800;margin:0 0 8px 0;letter-spacing:-0.3px;}
+  header p{margin:0;color:var(--gray-700);font-size:14.5px;line-height:1.6;max-width:760px;}
+
+  .tabs{display:flex;gap:10px;margin:26px 0 22px 0;}
+  .tab{
+    flex:1;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    padding:16px 18px;border-radius:14px;border:1.5px solid var(--gray-300);
+    background:#fff;cursor:pointer;font-weight:700;font-size:15.5px;color:var(--gray-700);
+    transition:border-color .15s, background .15s, color .15s;
+  }
+  .tab .ic{font-size:19px;}
+  .tab.work.active{border-color:var(--orange);background:var(--orange-tint);color:var(--orange);}
+  .tab.class.active{border-color:var(--green);background:var(--green-tint);color:var(--green);}
+
+  .grid{display:grid;grid-template-columns:1fr 1.05fr;gap:26px;align-items:start;}
+  @media (max-width:980px){ .grid{grid-template-columns:1fr;} }
+
+  .panel{
+    background:#fff;border:1px solid var(--gray-300);border-radius:16px;
+    padding:26px 26px 24px 26px;
+  }
+  .panel h2{font-size:16px;font-weight:800;margin:0 0 4px 0;display:flex;align-items:center;gap:8px;}
+  .panel .panel-desc{font-size:13px;color:var(--gray-500);margin:0 0 18px 0;}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13.5px;font-weight:700;margin-bottom:6px;color:#2B313C;}
+  .field .hint{font-weight:400;color:var(--gray-500);font-size:12px;margin-left:6px;}
+  .field input[type=text], .field textarea, .field select{
+    width:100%;border:1px solid var(--gray-300);border-radius:10px;
+    padding:10px 12px;font-size:14px;font-family:inherit;color:var(--ink);background:#FCFCFD;
+  }
+  .field input[type=text]:focus, .field textarea:focus, .field select:focus{
+    outline:none;border-color:var(--blue);background:#fff;
+  }
+  .field textarea{resize:vertical;min-height:64px;line-height:1.5;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    border:none;border-radius:11px;padding:13px 20px;font-size:15px;font-weight:700;
+    cursor:pointer;width:100%;transition:opacity .15s, transform .05s;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--blue);color:#fff;}
+  .btn-primary:disabled{opacity:.55;cursor:not-allowed;}
+  .btn-ghost{background:var(--gray-100);color:var(--ink);border:1px solid var(--gray-300);}
+  .btn-sm{padding:8px 14px;font-size:13px;width:auto;}
+
+  .prompt-box textarea{
+    width:100%;min-height:150px;border:1px solid var(--gray-300);border-radius:10px;
+    padding:14px;font-size:13px;line-height:1.65;font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+    color:#2B313C;background:#F8F9FC;resize:vertical;
+  }
+
+  .apikey-toggle{
+    font-size:12.5px;color:var(--gray-500);cursor:pointer;text-decoration:underline;
+    margin-top:10px;display:inline-block;
+  }
+  .apikey-box{
+    margin-top:12px;padding:14px 16px;background:var(--blue-tint);border:1px solid var(--blue-border);
+    border-radius:10px;font-size:12.5px;line-height:1.7;color:#26314A;display:none;
+  }
+  .apikey-box.show{display:block;}
+  .apikey-box input{
+    width:100%;margin-top:8px;border:1px solid var(--blue-border);border-radius:8px;
+    padding:9px 11px;font-size:13px;font-family:inherit;
+  }
+  .apikey-box a{color:var(--blue);}
+
+  /* result panel */
+  .result-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .seg{display:flex;gap:6px;background:var(--gray-100);border-radius:10px;padding:4px;}
+  .seg button{
+    border:none;background:transparent;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:700;
+    color:var(--gray-500);cursor:pointer;
+  }
+  .seg button.active{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(20,30,50,.08);}
+
+  .stage{
+    border:1px solid var(--gray-300);border-radius:12px;overflow:hidden;
+    height:480px;position:relative;background:#fff;
+  }
+  .stage iframe{width:100%;height:100%;border:none;display:block;}
+  .stage pre{
+    margin:0;padding:16px;height:100%;overflow:auto;font-size:12.5px;line-height:1.6;
+    font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;color:#2B313C;background:#F8F9FC;
+    white-space:pre-wrap;word-break:break-all;
+  }
+  .stage .empty{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;
+    color:var(--gray-500);font-size:13.5px;gap:10px;text-align:center;padding:0 40px;
+  }
+  .stage .empty .big{font-size:34px;}
+  .stage .loading{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;
+    color:var(--gray-700);font-size:13.5px;
+  }
+  .spinner{
+    width:30px;height:30px;border-radius:50%;border:3px solid var(--blue-border);
+    border-top-color:var(--blue);animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .error-box{
+    background:var(--red-tint);border:1px solid var(--red-border);color:#5C1E1E;
+    border-radius:10px;padding:14px 16px;font-size:13px;line-height:1.65;margin-top:14px;
+  }
+
+  .result-actions{display:flex;gap:10px;margin-top:14px;}
+
+  .hidden{display:none !important;}
+
+  /* ---- folder bar ---- */
+  .folder-bar{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:#fff;border:1px solid var(--gray-300);border-radius:12px;
+    padding:12px 16px;margin-bottom:18px;font-size:13.5px;color:var(--gray-700);
+  }
+  .folder-bar b{color:var(--ink);}
+  .folder-bar .status-dot{
+    width:8px;height:8px;border-radius:50%;background:#C7CCD6;flex:none;
+  }
+  .folder-bar .status-dot.on{background:var(--green);}
+  .folder-bar .spacer{flex:1;}
+  .folder-bar .note{font-size:12px;color:var(--gray-500);}
+
+  /* ---- hub tab & view ---- */
+  .tab.hub.active{border-color:#6B4FCB;background:#F3EFFC;color:#6B4FCB;}
+  .hub-panel{
+    background:#fff;border:1px solid var(--gray-300);border-radius:16px;padding:26px;
+  }
+  .hub-section-title{
+    font-size:13px;font-weight:800;color:var(--gray-500);margin:22px 0 12px 0;
+    text-transform:uppercase;letter-spacing:.4px;
+  }
+  .hub-section-title:first-child{margin-top:0;}
+  .hub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media (max-width:980px){ .hub-grid{grid-template-columns:1fr 1fr;} }
+  .app-card{
+    border:1px solid var(--gray-300);border-radius:12px;padding:16px;
+    display:flex;flex-direction:column;gap:10px;background:#FCFCFD;
+  }
+  .app-card .fname{font-weight:700;font-size:14px;word-break:break-all;}
+  .app-card .floc{font-size:11.5px;color:var(--gray-500);}
+  .app-card .app-actions{display:flex;gap:8px;margin-top:auto;}
+  .hub-empty{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:60px 20px;color:var(--gray-500);font-size:13.5px;text-align:center;gap:10px;
+  }
+  .hub-empty .big{font-size:34px;}
+
+  /* ---- attachment dropzone ---- */
+  .dropzone{
+    border:1.5px dashed var(--gray-300);border-radius:12px;
+    padding:22px 16px;text-align:center;cursor:pointer;background:#FAFBFD;
+    transition:border-color .15s, background .15s;
+  }
+  .dropzone:hover{border-color:var(--green);background:var(--green-tint);}
+  .dropzone.drag-over{border-color:var(--green);background:var(--green-tint);}
+  .dropzone .dz-icon{font-size:24px;margin-bottom:6px;}
+  .dropzone .dz-text{font-size:13.5px;color:#2B313C;}
+  .dropzone .dz-sub{font-size:11.5px;color:var(--gray-500);margin-top:4px;}
+
+  .attach-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+  .attach-chip{
+    display:flex;align-items:center;gap:10px;
+    border:1px solid var(--gray-300);border-radius:9px;padding:8px 12px;
+    background:#fff;font-size:12.5px;
+  }
+  .attach-chip .a-icon{font-size:16px;flex:none;}
+  .attach-chip .a-name{flex:1;font-weight:600;word-break:break-all;}
+  .attach-chip .a-status{font-size:11px;color:var(--gray-500);flex:none;}
+  .attach-chip .a-status.err{color:var(--red);}
+  .attach-chip .a-status.ok{color:var(--green);}
+  .attach-chip .a-remove{
+    flex:none;border:none;background:transparent;color:var(--gray-500);cursor:pointer;font-size:14px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">바이브코딩 실습 도구</div>
+    <h1>기획서 → 프롬프트 → 코드 미리보기</h1>
+    <p>기획서 항목을 채우면 프롬프트가 자동으로 만들어지고, 그 프롬프트로 AI가 실제 웹페이지 코드를 생성해 바로 미리볼 수 있습니다.</p>
+  </header>
+
+  <div class="folder-bar">
+    <div class="status-dot" id="folder-dot"></div>
+    <span id="folder-label">폴더가 연결되지 않았습니다 — 연결하면 결과물이 <b>exam 폴더</b>에 자동 저장되고, 만든 앱을 한 페이지에서 모아볼 수 있어요.</span>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost btn-sm" id="connect-folder-btn">📁 폴더 연결</button>
+    <span class="note" id="folder-unsupported" style="display:none;">이 브라우저는 폴더 연결을 지원하지 않아요 (Chrome/Edge 권장)</span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab work active" data-mode="work">
+      <span class="ic">🗂️</span> 업무용 기획서
+    </div>
+    <div class="tab class" data-mode="class">
+      <span class="ic">🎓</span> 수업용 기획서
+    </div>
+    <div class="tab hub" data-mode="hub">
+      <span class="ic">📂</span> 내 앱 모아보기
+    </div>
+  </div>
+
+  <div class="hub-panel hidden" id="hub-view">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <h2 style="margin:0;font-size:16px;font-weight:800;">📂 내 앱 모아보기</h2>
+      <button class="btn btn-ghost btn-sm" id="refresh-hub-btn">🔁 새로고침</button>
+    </div>
+    <p class="panel-desc">연결한 폴더와 그 안의 <b>exam</b> 폴더에 있는 HTML 앱을 모두 보여줍니다.</p>
+    <div id="hub-content">
+      <div class="hub-empty">
+        <div class="big">📁</div>
+        <div>위의 <b>"폴더 연결"</b> 버튼을 눌러 앱들이 있는 폴더를 선택해주세요.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" id="main-grid">
+    <!-- LEFT: FORM -->
+    <div class="panel">
+      <h2 id="form-title">🗂️ 업무용 기획서</h2>
+      <p class="panel-desc" id="form-desc">반복되는 행정·수업 준비 업무를 줄여주는 도구를 기획합니다.</p>
+
+      <!-- 업무용 필드 -->
+      <div id="fields-work">
+        <div class="field">
+          <label>도구 이름</label>
+          <input type="text" id="w_name" placeholder="예: 상담일지 요약 도구">
+        </div>
+        <div class="field">
+          <label>목적 <span class="hint">왜 만드는가</span></label>
+          <input type="text" id="w_purpose" placeholder="예: 학생 상담 기록을 빠르게 요약하고 후속 조치를 정리하기 위해">
+        </div>
+        <div class="field">
+          <label>사용할 사람</label>
+          <input type="text" id="w_user" placeholder="예: 담임교사 본인">
+        </div>
+        <div class="field">
+          <label>핵심 기능 <span class="hint">한 줄에 하나씩</span></label>
+          <textarea id="w_features" placeholder="예:&#10;상담 기록 텍스트 붙여넣기&#10;핵심 내용 자동 요약&#10;후속 조치 제안 생성"></textarea>
+        </div>
+        <div class="field">
+          <label>입력 → 출력</label>
+          <input type="text" id="w_io" placeholder="예: 상담 기록을 입력하면 → 요약과 후속 조치 표가 나온다">
+        </div>
+        <div class="field">
+          <label>제약조건</label>
+          <input type="text" id="w_constraints" placeholder="예: 학생 이름은 이니셜로 처리, 결과는 A4 한 장 분량">
+        </div>
+        <div class="field">
+          <label>결과물 형태</label>
+          <select id="w_format">
+            <option value="바로 쓸 수 있는 인터랙티브 웹페이지 도구">웹페이지 도구</option>
+            <option value="복사해서 쓸 수 있는 문서 초안(텍스트 중심)">문서 초안(텍스트)</option>
+            <option value="한눈에 보는 표 형태 데이터 화면">표 형태 데이터</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 수업용 필드 -->
+      <div id="fields-class" class="hidden">
+        <div class="field">
+          <label>수업 자료 이름</label>
+          <input type="text" id="c_name" placeholder="예: 광합성 개념 점검 퀴즈">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>학년 · 교과</label>
+            <input type="text" id="c_grade" placeholder="예: 중2 과학">
+          </div>
+          <div class="field">
+            <label>학생 수준</label>
+            <select id="c_level">
+              <option value="중">중 (평균 수준)</option>
+              <option value="상">상 (심화)</option>
+              <option value="하">하 (기초)</option>
+              <option value="혼합 수준">혼합 수준</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>수업(활동) 시간</label>
+          <input type="text" id="c_time" placeholder="예: 10분">
+        </div>
+        <div class="field">
+          <label>목적 <span class="hint">어떤 개념을 확인·연습시키는가</span></label>
+          <input type="text" id="c_purpose" placeholder="예: 광합성 개념을 학생이 스스로 점검하게 하기">
+        </div>
+        <div class="field">
+          <label>핵심 기능 <span class="hint">한 줄에 하나씩</span></label>
+          <textarea id="c_features" placeholder="예:&#10;5문항 객관식&#10;정답 확인 버튼&#10;오답 시 간단한 해설 표시"></textarea>
+        </div>
+        <div class="field">
+          <label>입력 → 출력</label>
+          <input type="text" id="c_io" placeholder="예: 학생이 답을 클릭하면 → 정답 여부와 해설이 바로 나온다">
+        </div>
+        <div class="field">
+          <label>제약조건</label>
+          <input type="text" id="c_constraints" placeholder="예: 중2 수준 어휘, 5분 내 완료 가능한 분량">
+        </div>
+        <div class="field">
+          <label>참고 자료 <span class="hint">교과서 내용·학습지 초안 등 (선택, 여러 개 가능)</span></label>
+          <div class="dropzone" id="c-dropzone">
+            <div class="dz-icon">📎</div>
+            <div class="dz-text">파일을 여기로 끌어다 놓거나 <b>클릭해서 선택</b>하세요</div>
+            <div class="dz-sub">텍스트(.txt·.md) · PDF · 이미지(.png·.jpg) · Word(.docx)</div>
+            <input type="file" id="c-file-input" multiple hidden accept=".txt,.md,.pdf,.png,.jpg,.jpeg,.webp,.docx">
+          </div>
+          <div class="attach-list" id="c-attach-list"></div>
+        </div>
+        <div class="field">
+          <label>결과물 형태</label>
+          <select id="c_format">
+            <option value="학생이 클릭하며 활동하는 인터랙티브 웹페이지">인터랙티브 웹페이지</option>
+            <option value="인쇄해서 쓸 수 있는 학습지 형태 웹페이지">학습지 형태</option>
+            <option value="모둠활동용 도구(타이머·점수판 등)">모둠활동 도구</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="prompt-box" style="margin-top:20px;">
+        <label style="display:block;font-size:13.5px;font-weight:700;margin-bottom:6px;">생성된 프롬프트 <span class="hint">수정 후 사용해도 됩니다</span></label>
+        <textarea id="prompt-text"></textarea>
+      </div>
+
+      <div class="apikey-box show" id="apikey-box" style="margin-top:20px;">
+        <b>🔑 Claude API 키 (필수)</b><br>
+        이 도구는 실제로 코드를 생성할 때마다 <b>Claude API</b>를 호출합니다. 어디서 열었든(로컬 파일이든, 이 채팅의 미리보기이든) 아래에 본인의 API 키를 입력해야 "AI로 코드 생성하기"가 동작합니다.
+        <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>에서 발급받을 수 있습니다. 키는 저장되지 않으며, 새로고침하면 다시 입력해야 합니다. (호출마다 API 사용 요금이 발생합니다)
+        <input type="password" id="api-key" placeholder="sk-ant-...">
+        <div id="key-status" style="margin-top:8px;font-weight:700;"></div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <button class="btn btn-primary" id="generate-btn">✨ AI로 코드 생성하기</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: RESULT -->
+    <div class="panel">
+      <div class="result-head">
+        <h2 style="margin:0;">결과</h2>
+        <div class="seg">
+          <button class="active" data-view="preview">미리보기</button>
+          <button data-view="code">코드 보기</button>
+        </div>
+      </div>
+      <div class="stage" id="stage">
+        <div class="empty">
+          <div class="big">🛠️</div>
+          <div>왼쪽 기획서를 채우고<br><b>"AI로 코드 생성하기"</b>를 눌러보세요.</div>
+        </div>
+      </div>
+      <div class="result-actions hidden" id="result-actions">
+        <button class="btn btn-ghost btn-sm" id="download-btn">⬇ HTML로 다운로드</button>
+        <button class="btn btn-ghost btn-sm" id="retry-btn">🔁 다시 생성</button>
+      </div>
+      <div id="error-area"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var mode = 'work';
+  var generatedHTML = '';
+  var dirHandle = null;
+  var fsSupported = typeof window.showDirectoryPicker === 'function';
+  var classAttachments = []; // { id, name, kind: 'text'|'image'|'pdf', mediaType, base64, textContent, status: 'loading'|'done'|'error', errorMsg }
+  var attachIdSeq = 0;
+  var currentView = 'preview';
+
+  var els = {
+    tabs: document.querySelectorAll('.tab'),
+    formTitle: document.getElementById('form-title'),
+    formDesc: document.getElementById('form-desc'),
+    fieldsWork: document.getElementById('fields-work'),
+    fieldsClass: document.getElementById('fields-class'),
+    promptText: document.getElementById('prompt-text'),
+    generateBtn: document.getElementById('generate-btn'),
+    apiKeyInput: document.getElementById('api-key'),
+    keyStatus: document.getElementById('key-status'),
+    stage: document.getElementById('stage'),
+    seg: document.querySelectorAll('.seg button'),
+    resultActions: document.getElementById('result-actions'),
+    downloadBtn: document.getElementById('download-btn'),
+    retryBtn: document.getElementById('retry-btn'),
+    errorArea: document.getElementById('error-area'),
+    connectFolderBtn: document.getElementById('connect-folder-btn'),
+    folderDot: document.getElementById('folder-dot'),
+    folderLabel: document.getElementById('folder-label'),
+    folderUnsupported: document.getElementById('folder-unsupported'),
+    refreshHubBtn: document.getElementById('refresh-hub-btn'),
+    hubContent: document.getElementById('hub-content'),
+  };
+
+  var workIds  = ['w_name','w_purpose','w_user','w_features','w_io','w_constraints','w_format'];
+  var classIds = ['c_name','c_grade','c_level','c_time','c_purpose','c_features','c_io','c_constraints','c_format'];
+
+  function val(id){ var e = document.getElementById(id); return e ? e.value.trim() : ''; }
+
+  function buildPrompt(){
+    var p = '';
+    if(mode === 'work'){
+      var name = val('w_name') || '업무 도구';
+      p += '너는 학교 행정업무를 돕는 전문 웹 개발자야.\n\n';
+      p += '[도구 이름] ' + name + '\n';
+      p += '[목적] ' + val('w_purpose') + '\n';
+      p += '[사용할 사람] ' + val('w_user') + '\n';
+      p += '[핵심 기능]\n' + val('w_features') + '\n';
+      p += '[입력 → 출력] ' + val('w_io') + '\n';
+      p += '[제약조건] ' + val('w_constraints') + '\n';
+      p += '[결과물 형태] ' + document.getElementById('w_format').value + '\n\n';
+      p += '위 내용을 바탕으로 지금 바로 사용할 수 있는 웹페이지를 하나의 완전한 HTML 파일로 만들어줘. 실제 학교 업무에 쓸 수 있도록 화면은 깔끔하고 사용법이 직관적이어야 해.';
+    } else {
+      var cname = val('c_name') || '수업 자료';
+      p += '너는 중학교 수업에 쓸 인터랙티브 학습 자료를 만드는 전문 웹 개발자야.\n\n';
+      p += '[자료 이름] ' + cname + '\n';
+      p += '[학년 · 교과] ' + val('c_grade') + '\n';
+      p += '[학생 수준] ' + document.getElementById('c_level').value + '\n';
+      p += '[수업(활동) 시간] ' + val('c_time') + '\n';
+      p += '[목적] ' + val('c_purpose') + '\n';
+      p += '[핵심 기능]\n' + val('c_features') + '\n';
+      p += '[입력 → 출력] ' + val('c_io') + '\n';
+      p += '[제약조건] ' + val('c_constraints') + '\n';
+      p += '[결과물 형태] ' + document.getElementById('c_format').value + '\n\n';
+      var doneAttachments = classAttachments.filter(function(a){ return a.status === 'done'; });
+      if(doneAttachments.length){
+        p += '[참고 자료] 첨부된 자료(' + doneAttachments.map(function(a){ return a.name; }).join(', ') + ')의 내용을 반영해서 만들어줘.\n\n';
+      }
+      p += '위 내용을 바탕으로 학생이 별도 설치 없이 바로 사용할 수 있는 웹페이지를 하나의 완전한 HTML 파일로 만들어줘. 학생 수준에 맞는 쉬운 문구를 쓰고, 화면은 밝고 명확해야 해.';
+    }
+    return p;
+  }
+
+  function refreshPrompt(){
+    els.promptText.value = buildPrompt();
+  }
+
+  function switchMode(next){
+    mode = next;
+    els.tabs.forEach(function(t){ t.classList.toggle('active', t.dataset.mode === next); });
+
+    if(next === 'hub'){
+      document.getElementById('main-grid').classList.add('hidden');
+      document.getElementById('hub-view').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('main-grid').classList.remove('hidden');
+    document.getElementById('hub-view').classList.add('hidden');
+
+    if(next === 'work'){
+      els.fieldsWork.classList.remove('hidden');
+      els.fieldsClass.classList.add('hidden');
+      els.formTitle.textContent = '🗂️ 업무용 기획서';
+      els.formDesc.textContent = '반복되는 행정·수업 준비 업무를 줄여주는 도구를 기획합니다.';
+    } else {
+      els.fieldsWork.classList.add('hidden');
+      els.fieldsClass.classList.remove('hidden');
+      els.formTitle.textContent = '🎓 수업용 기획서';
+      els.formDesc.textContent = '학생이 바로 쓸 수 있는 수업 활용 자료를 기획합니다.';
+    }
+    refreshPrompt();
+  }
+
+  els.tabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      switchMode(t.dataset.mode);
+      if(t.dataset.mode === 'hub' && dirHandle){ scanApps(); }
+    });
+  });
+
+  workIds.concat(classIds).forEach(function(id){
+    var e = document.getElementById(id);
+    if(e){ e.addEventListener('input', refreshPrompt); e.addEventListener('change', refreshPrompt); }
+  });
+
+  // ---------- 참고 자료 첨부 (수업용) ----------
+  var dz = document.getElementById('c-dropzone');
+  var fileInput = document.getElementById('c-file-input');
+  var attachListEl = document.getElementById('c-attach-list');
+  var MAX_ATTACH_BYTES = 20 * 1024 * 1024; // 20MB
+  var mammothLoadPromise = null;
+
+  function loadMammoth(){
+    if(window.mammoth) return Promise.resolve();
+    if(mammothLoadPromise) return mammothLoadPromise;
+    mammothLoadPromise = new Promise(function(resolve, reject){
+      var s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+      s.onload = function(){ resolve(); };
+      s.onerror = function(){ reject(new Error('Word 파일 변환 기능을 불러오지 못했습니다 (인터넷 연결 확인)')); };
+      document.head.appendChild(s);
+    });
+    return mammothLoadPromise;
+  }
+
+  function readAsText(file){
+    return new Promise(function(resolve, reject){
+      var r = new FileReader();
+      r.onload = function(){ resolve(r.result); };
+      r.onerror = function(){ reject(new Error('파일을 읽지 못했습니다')); };
+      r.readAsText(file);
+    });
+  }
+
+  function readAsBase64(file){
+    return new Promise(function(resolve, reject){
+      var r = new FileReader();
+      r.onload = function(){ resolve(r.result.split(',')[1]); };
+      r.onerror = function(){ reject(new Error('파일을 읽지 못했습니다')); };
+      r.readAsDataURL(file);
+    });
+  }
+
+  function renderAttachList(){
+    if(classAttachments.length === 0){ attachListEl.innerHTML = ''; return; }
+    attachListEl.innerHTML = classAttachments.map(function(a){
+      var icon = a.kind === 'image' ? '🖼️' : a.kind === 'pdf' ? '📕' : '📄';
+      var statusText = a.status === 'loading' ? '읽는 중…' : a.status === 'error' ? (a.errorMsg || '오류') : '첨부됨';
+      var statusClass = a.status === 'error' ? 'err' : a.status === 'done' ? 'ok' : '';
+      return '<div class="attach-chip">' +
+        '<span class="a-icon">' + icon + '</span>' +
+        '<span class="a-name">' + a.name + '</span>' +
+        '<span class="a-status ' + statusClass + '">' + statusText + '</span>' +
+        '<button class="a-remove" data-remove="' + a.id + '" title="제거">✕</button>' +
+      '</div>';
+    }).join('');
+
+    attachListEl.querySelectorAll('[data-remove]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = parseInt(btn.dataset.remove, 10);
+        classAttachments = classAttachments.filter(function(a){ return a.id !== id; });
+        renderAttachList();
+        refreshPrompt();
+      });
+    });
+  }
+
+  async function processFile(file){
+    var id = ++attachIdSeq;
+    var item = { id: id, name: file.name, kind: 'text', status: 'loading' };
+    classAttachments.push(item);
+    renderAttachList();
+
+    try{
+      if(file.size > MAX_ATTACH_BYTES){
+        throw new Error('20MB보다 큰 파일이에요');
+      }
+      var lower = file.name.toLowerCase();
+
+      if(file.type.indexOf('image/') === 0){
+        item.kind = 'image';
+        item.mediaType = file.type;
+        item.base64 = await readAsBase64(file);
+      } else if(file.type === 'application/pdf' || lower.endsWith('.pdf')){
+        item.kind = 'pdf';
+        item.base64 = await readAsBase64(file);
+      } else if(lower.endsWith('.docx')){
+        await loadMammoth();
+        var buf = await file.arrayBuffer();
+        var result = await window.mammoth.extractRawText({ arrayBuffer: buf });
+        item.kind = 'text';
+        item.textContent = result.value;
+      } else if(lower.endsWith('.txt') || lower.endsWith('.md') || file.type.indexOf('text/') === 0){
+        item.kind = 'text';
+        item.textContent = await readAsText(file);
+      } else {
+        throw new Error('지원하지 않는 형식이에요');
+      }
+      item.status = 'done';
+    }catch(err){
+      item.status = 'error';
+      item.errorMsg = err.message;
+    }
+    renderAttachList();
+    refreshPrompt();
+  }
+
+  function handleFiles(fileList){
+    Array.prototype.forEach.call(fileList, function(f){ processFile(f); });
+  }
+
+  dz.addEventListener('click', function(){ fileInput.click(); });
+  fileInput.addEventListener('change', function(){
+    handleFiles(fileInput.files);
+    fileInput.value = '';
+  });
+  ['dragenter','dragover'].forEach(function(evt){
+    dz.addEventListener(evt, function(e){ e.preventDefault(); e.stopPropagation(); dz.classList.add('drag-over'); });
+  });
+  ['dragleave','drop'].forEach(function(evt){
+    dz.addEventListener(evt, function(e){ e.preventDefault(); e.stopPropagation(); dz.classList.remove('drag-over'); });
+  });
+  dz.addEventListener('drop', function(e){
+    if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length){
+      handleFiles(e.dataTransfer.files);
+    }
+  });
+
+  function showEmpty(){
+    els.stage.innerHTML = '<div class="empty"><div class="big">🛠️</div><div>왼쪽 기획서를 채우고<br><b>"AI로 코드 생성하기"</b>를 눌러보세요.</div></div>';
+    els.resultActions.classList.add('hidden');
+  }
+
+  function showLoading(){
+    els.stage.innerHTML = '<div class="loading"><div class="spinner"></div><div>AI가 코드를 작성하고 있습니다…</div></div>';
+    els.resultActions.classList.add('hidden');
+    els.errorArea.innerHTML = '';
+  }
+
+  function showError(msg){
+    els.errorArea.innerHTML = '<div class="error-box">⚠️ ' + msg + '</div>';
+  }
+
+  function showSuccess(msg){
+    els.errorArea.innerHTML = '<div class="error-box" style="background:var(--green-tint);border-color:var(--green-border);color:#0E3D2C;">✅ ' + msg + '</div>';
+  }
+
+  function renderResult(){
+    if(currentView === 'preview'){
+      els.stage.innerHTML = '<iframe sandbox="allow-scripts allow-forms allow-popups allow-modals" srcdoc="' +
+        generatedHTML.replace(/"/g,'&quot;') + '"></iframe>';
+    } else {
+      var codeEl = document.createElement('pre');
+      codeEl.textContent = generatedHTML;
+      els.stage.innerHTML = '';
+      els.stage.appendChild(codeEl);
+    }
+  }
+
+  els.seg.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      els.seg.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentView = btn.dataset.view;
+      if(generatedHTML) renderResult();
+    });
+  });
+
+  function extractHTML(text){
+    var m = text.match(/```(?:html)?\s*([\s\S]*?)```/i);
+    if(m) return m[1].trim();
+    return text.trim();
+  }
+
+  function buildMessageContent(promptText){
+    var doneAttachments = mode === 'class' ? classAttachments.filter(function(a){ return a.status === 'done'; }) : [];
+    if(doneAttachments.length === 0) return promptText;
+
+    var content = [{ type: 'text', text: promptText }];
+    doneAttachments.forEach(function(a){
+      if(a.kind === 'image'){
+        content.push({ type: 'image', source: { type: 'base64', media_type: a.mediaType, data: a.base64 } });
+      } else if(a.kind === 'pdf'){
+        content.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: a.base64 } });
+      } else {
+        content.push({ type: 'text', text: '[첨부 자료: ' + a.name + ']\n' + a.textContent });
+      }
+    });
+    return content;
+  }
+
+  async function callClaude(promptText){
+    var apiKey = els.apiKeyInput.value.trim();
+    var headers = {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    };
+    var body = {
+      model: 'claude-sonnet-4-6',
+      max_tokens: 8000,
+      system: '당신은 학교 현장의 바이브코딩을 돕는 웹 개발자입니다. 아래 규칙을 반드시 지켜 완전히 동작하는 하나의 HTML 파일을 작성하세요.\n1) 설명, 인사말, 요약 없이 코드만 출력합니다.\n2) <!DOCTYPE html>부터 </html>까지 하나의 파일로 작성하고 CSS와 JS를 모두 인라인으로 포함합니다.\n3) 외부 파일이나 서버 없이 브라우저에서 바로 동작해야 합니다.\n4) 한글이 자연스럽게 보이도록 시스템 폰트를 사용합니다.\n5) 마크다운 코드펜스(```) 없이 순수 HTML 코드만 출력합니다.',
+      messages: [{ role: 'user', content: buildMessageContent(promptText) }]
+    };
+
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(body)
+    });
+
+    if(!res.ok){
+      var errText = await res.text();
+      var friendly = '';
+      if(res.status === 401){
+        friendly = 'API 키가 올바르지 않습니다. 키를 다시 확인해주세요.';
+      } else if(res.status === 429){
+        friendly = '요청이 너무 많거나 사용 한도(크레딧)를 초과했습니다. 잠시 후 다시 시도하거나 콘솔에서 크레딧을 확인해주세요.';
+      } else if(res.status === 400){
+        friendly = '요청 형식에 문제가 있습니다: ' + errText.slice(0,200);
+      } else if(res.status >= 500){
+        friendly = 'Claude 서버가 일시적으로 응답하지 않습니다. 잠시 후 다시 시도해주세요.';
+      } else {
+        friendly = 'API 오류 (' + res.status + '): ' + errText.slice(0,200);
+      }
+      throw new Error(friendly);
+    }
+    var data = await res.json();
+    var textBlocks = (data.content || []).filter(function(b){ return b.type === 'text'; }).map(function(b){ return b.text; });
+    return extractHTML(textBlocks.join('\n'));
+  }
+
+  els.generateBtn.addEventListener('click', async function(){
+    var promptText = els.promptText.value.trim();
+    if(!promptText){ showError('먼저 기획서 항목을 입력해주세요.'); return; }
+
+    var apiKey = els.apiKeyInput.value.trim();
+    if(!apiKey){
+      els.errorArea.innerHTML = '';
+      els.keyStatus.style.color = 'var(--red)';
+      els.keyStatus.textContent = '⚠️ API 키를 먼저 입력해주세요. 키가 없으면 코드를 생성할 수 없습니다.';
+      els.apiKeyInput.focus();
+      return;
+    }
+    els.keyStatus.textContent = '';
+
+    els.generateBtn.disabled = true;
+    showLoading();
+
+    try{
+      var html = await callClaude(promptText);
+      generatedHTML = html;
+      renderResult();
+      els.resultActions.classList.remove('hidden');
+      els.errorArea.innerHTML = '';
+    }catch(err){
+      showEmpty();
+      var msg = err.message || String(err);
+      if(msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1){
+        msg = '네트워크 요청이 차단되었습니다. 인터넷 연결을 확인하거나, 이 파일을 <b>내려받아 로컬에서 직접 열어서(브라우저로 더블클릭)</b> 다시 시도해주세요.';
+      }
+      showError('코드 생성에 실패했습니다. ' + msg);
+    }finally{
+      els.generateBtn.disabled = false;
+    }
+  });
+
+  els.retryBtn.addEventListener('click', function(){ els.generateBtn.click(); });
+
+  // ---------- 파일 이름 만들기 ----------
+  function currentToolName(){
+    var raw = mode === 'class' ? (val('c_name') || '수업자료') : (val('w_name') || '업무도구');
+    return raw.replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, '_').slice(0,60) || '결과물';
+  }
+
+  function downloadPlain(filename){
+    var blob = new Blob([generatedHTML], { type: 'text/html' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // ---------- 폴더 연결 (File System Access API) ----------
+  if(!fsSupported){
+    els.connectFolderBtn.style.display = 'none';
+    els.folderUnsupported.style.display = 'inline';
+    els.folderLabel.textContent = '이 브라우저에서는 exam 폴더 자동 저장·앱 모아보기를 지원하지 않습니다. 다운로드 버튼은 그대로 사용할 수 있어요.';
+  }
+
+  async function ensureExamDir(){
+    if(!dirHandle) return null;
+    return await dirHandle.getDirectoryHandle('exam', { create: true });
+  }
+
+  async function writeFileToDir(handle, filename, content){
+    var fileHandle = await handle.getFileHandle(filename, { create: true });
+    var writable = await fileHandle.createWritable();
+    await writable.write(content);
+    await writable.close();
+  }
+
+  function setFolderConnected(name){
+    els.folderDot.classList.add('on');
+    els.folderLabel.innerHTML = '📁 연결된 폴더: <b>' + name + '</b> — 다운로드 시 이 폴더의 <b>exam</b> 폴더에 자동 저장됩니다.';
+    els.connectFolderBtn.textContent = '🔁 폴더 변경';
+  }
+
+  els.connectFolderBtn.addEventListener('click', async function(){
+    if(!fsSupported) return;
+    try{
+      dirHandle = await window.showDirectoryPicker();
+      setFolderConnected(dirHandle.name);
+      if(mode === 'hub') scanApps();
+    }catch(err){
+      // 사용자가 취소한 경우 등은 조용히 무시
+      if(err && err.name !== 'AbortError'){
+        showError('폴더 연결에 실패했습니다: ' + err.message);
+      }
+    }
+  });
+
+  // ---------- 앱 모아보기 ----------
+  function appCardHTML(name, locationLabel, idx){
+    return '<div class="app-card">' +
+      '<div class="fname">📄 ' + name + '</div>' +
+      '<div class="floc">' + locationLabel + '</div>' +
+      '<div class="app-actions">' +
+        '<button class="btn btn-ghost btn-sm" data-open="' + idx + '">새 탭에서 열기</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  var hubFiles = []; // { handle, name, locationLabel }
+
+  async function collectHtmlFiles(handle, locationLabel, list){
+    for await (var entry of handle.values()){
+      if(entry.kind === 'file' && /\.html?$/i.test(entry.name)){
+        list.push({ handle: entry, name: entry.name, locationLabel: locationLabel });
+      }
+    }
+  }
+
+  async function scanApps(){
+    if(!dirHandle) return;
+    els.hubContent.innerHTML = '<div class="hub-empty"><div class="big">⏳</div><div>폴더를 살펴보는 중…</div></div>';
+    hubFiles = [];
+    try{
+      await collectHtmlFiles(dirHandle, '📁 ' + dirHandle.name + ' (루트)', hubFiles);
+      try{
+        var examHandle = await dirHandle.getDirectoryHandle('exam', { create: false });
+        await collectHtmlFiles(examHandle, '📁 exam', hubFiles);
+      }catch(e){ /* exam 폴더가 아직 없으면 건너뜀 */ }
+
+      if(hubFiles.length === 0){
+        els.hubContent.innerHTML = '<div class="hub-empty"><div class="big">🗂️</div><div>이 폴더에서 HTML 앱을 찾지 못했습니다.</div></div>';
+        return;
+      }
+
+      var rootFiles = hubFiles.filter(function(f){ return f.locationLabel.indexOf('exam') === -1; });
+      var examFiles = hubFiles.filter(function(f){ return f.locationLabel.indexOf('exam') !== -1; });
+
+      var html = '';
+      if(rootFiles.length){
+        html += '<div class="hub-section-title">이 폴더의 앱 (' + rootFiles.length + ')</div><div class="hub-grid">';
+        rootFiles.forEach(function(f){ html += appCardHTML(f.name, f.locationLabel, hubFiles.indexOf(f)); });
+        html += '</div>';
+      }
+      if(examFiles.length){
+        html += '<div class="hub-section-title">exam 폴더의 결과물 (' + examFiles.length + ')</div><div class="hub-grid">';
+        examFiles.forEach(function(f){ html += appCardHTML(f.name, f.locationLabel, hubFiles.indexOf(f)); });
+        html += '</div>';
+      }
+      els.hubContent.innerHTML = html;
+
+      els.hubContent.querySelectorAll('[data-open]').forEach(function(btn){
+        btn.addEventListener('click', async function(){
+          var item = hubFiles[parseInt(btn.dataset.open, 10)];
+          var file = await item.handle.getFile();
+          var url = URL.createObjectURL(file);
+          window.open(url, '_blank');
+        });
+      });
+    }catch(err){
+      els.hubContent.innerHTML = '<div class="hub-empty"><div class="big">⚠️</div><div>폴더를 읽는 중 문제가 발생했습니다: ' + err.message + '</div></div>';
+    }
+  }
+
+  els.refreshHubBtn.addEventListener('click', function(){
+    if(!dirHandle){
+      els.hubContent.innerHTML = '<div class="hub-empty"><div class="big">📁</div><div>위의 <b>"폴더 연결"</b> 버튼을 눌러 앱들이 있는 폴더를 선택해주세요.</div></div>';
+      return;
+    }
+    scanApps();
+  });
+
+  // ---------- 다운로드: exam 폴더에 자동 저장 ----------
+  els.downloadBtn.addEventListener('click', async function(){
+    if(!generatedHTML) return;
+    var filename = currentToolName() + '.html';
+
+    if(dirHandle){
+      try{
+        var examDir = await ensureExamDir();
+        await writeFileToDir(examDir, filename, generatedHTML);
+        showSuccess('"' + dirHandle.name + '/exam/' + filename + '"에 저장했습니다.');
+        if(mode === 'hub') scanApps();
+        return;
+      }catch(err){
+        showError('exam 폴더 저장에 실패해 일반 다운로드로 대신합니다: ' + err.message);
+      }
+    }
+    downloadPlain(filename);
+  });
+
+  // init
+  refreshPrompt();
+})();
+</script>
+</body>
+</html>
