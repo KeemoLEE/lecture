@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>바이브코딩 특강 교안</title>
+<style>
+  :root{
+    --ink:#14181F;
+    --gray-700:#4B5563;
+    --gray-500:#6B7280;
+    --gray-300:#E5E9F0;
+    --bg:#FFFFFF;
+
+    --blue:#2454C7;
+    --blue-tint:#EEF3FF;
+    --blue-border:#D6E1FA;
+
+    --green:#12805C;
+    --green-tint:#E9F7F1;
+    --green-border:#CDEBDE;
+
+    --orange:#B5541D;
+    --orange-tint:#FDF3E9;
+    --orange-border:#F5DCC0;
+
+    --red:#B23A3A;
+    --red-tint:#FCEEEE;
+    --red-border:#F3CFCF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Noto Sans CJK KR","Noto Sans KR",sans-serif;
+    color:var(--ink);
+    background:#fff;
+  }
+  .slide{
+    width:1280px;
+    height:720px;
+    position:relative;
+    padding:58px 72px 50px 72px;
+    overflow:hidden;
+    break-after:page;
+    background:
+      radial-gradient(480px 320px at 96% -6%, #EAF0FF 0%, rgba(234,240,255,0) 70%),
+      radial-gradient(420px 300px at 0% 108%, #EEFBF5 0%, rgba(238,251,245,0) 70%),
+      #ffffff;
+  }
+  .eyebrow{
+    color:var(--blue);
+    font-weight:700;
+    font-size:17px;
+    margin:0 0 10px 0;
+    letter-spacing:.2px;
+  }
+  .eyebrow.green{color:var(--green);}
+  .eyebrow.orange{color:var(--orange);}
+  .heading{display:flex;align-items:center;gap:16px;margin-bottom:8px;}
+  .heading .bar{width:6px;height:32px;border-radius:3px;background:var(--blue);flex:none;}
+  .heading.green .bar{background:var(--green);}
+  .heading.orange .bar{background:var(--orange);}
+  .heading h1{font-size:36px;font-weight:800;margin:0;letter-spacing:-0.3px;}
+  .sub{color:var(--gray-700);font-size:18px;margin:14px 0 28px 0;line-height:1.6;max-width:920px;}
+
+  .page-num{
+    position:absolute;right:44px;bottom:26px;
+    color:#B7BEC9;font-size:15.5px;font-weight:500;
+  }
+
+  /* ---- screen viewer: fit one slide per screen, centered ---- */
+  @media screen{
+    html, body{ height:100%; }
+    body{
+      background:#E7EBF1;
+      scroll-snap-type:y mandatory;
+    }
+    .frame{
+      width:100vw;
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      scroll-snap-align:start;
+      scroll-snap-stop:always;
+    }
+    .slide{
+      transform:scale(var(--fit-scale, 1));
+      transform-origin:center center;
+      flex:none;
+      box-shadow:0 10px 40px rgba(20,30,50,.14);
+      break-after:auto; /* 화면에서는 인쇄용 페이지 나눔이 필요 없음 */
+    }
+  }
+  @media print{
+    .frame{ display:contents; }
+    .slide{ transform:none !important; box-shadow:none !important; }
+  }
+
+  /* ---- cards ---- */
+  .cards{display:grid;gap:22px;}
+  .cards.c2{grid-template-columns:1fr 1fr;}
+  .cards.c3{grid-template-columns:1fr 1fr 1fr;}
+  .card{
+    background:#fff;
+    border:1px solid var(--gray-300);
+    border-top:4px solid var(--blue);
+    border-radius:14px;
+    padding:24px 24px 22px 24px;
+  }
+  .card.green{border-top-color:var(--green);}
+  .card.orange{border-top-color:var(--orange);}
+  .card .icon{
+    width:38px;height:38px;border-radius:10px;
+    background:var(--blue-tint);color:var(--blue);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:14px;
+  }
+  .card.green .icon{background:var(--green-tint);color:var(--green);}
+  .card.orange .icon{background:var(--orange-tint);color:var(--orange);}
+  .card h3{font-size:19.5px;font-weight:700;margin:0 0 8px 0;}
+  .card p{font-size:15.5px;line-height:1.65;color:var(--gray-700);margin:0;}
+  .card ul{margin:6px 0 0 0;padding-left:18px;color:var(--gray-700);font-size:15px;line-height:1.65;}
+  .card .tag{
+    display:inline-block;font-size:13.5px;font-weight:700;color:var(--blue);
+    background:var(--blue-tint);border-radius:20px;padding:3px 11px;margin-bottom:10px;
+  }
+  .card.green .tag{color:var(--green);background:var(--green-tint);}
+  .card.orange .tag{color:var(--orange);background:var(--orange-tint);}
+
+  /* ---- callout ---- */
+  .callout{
+    display:flex;gap:13px;align-items:flex-start;
+    border-radius:12px;padding:17px 20px;
+    background:var(--blue-tint);border:1px solid var(--blue-border);
+    font-size:16px;line-height:1.65;color:#26314A;
+  }
+  .callout.green{background:var(--green-tint);border-color:var(--green-border);color:#0E3D2C;}
+  .callout.orange{background:var(--orange-tint);border-color:var(--orange-border);color:#5C3011;}
+  .callout.red{background:var(--red-tint);border-color:var(--red-border);color:#5C1E1E;}
+  .callout .ic{flex:none;margin-top:1px;}
+  .callout b{font-weight:700;}
+
+  /* ---- icon svg base ---- */
+  svg{display:block;}
+
+  /* ---- title slide ---- */
+  .title-slide{display:flex;flex-direction:column;justify-content:center;}
+  .title-slide .eyebrow{font-size:19px;}
+  .title-slide h1{
+    font-size:56px;font-weight:800;line-height:1.28;margin:14px 0 18px 0;letter-spacing:-0.5px;
+  }
+  .title-slide .subtitle{
+    color:var(--blue);font-size:22.5px;font-weight:500;margin:0 0 34px 0;
+  }
+  .pills{display:flex;gap:14px;}
+  .pill{
+    display:flex;align-items:center;gap:9px;
+    border:1px solid var(--gray-300);border-radius:24px;
+    padding:11px 20px;font-size:17px;font-weight:600;color:var(--ink);
+    background:#fff;
+  }
+
+  /* ---- quote slide ---- */
+  .quote-slide{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+  .quote-slide .qmark{font-size:71.5px;color:#D9E0EC;font-weight:900;line-height:1;margin-bottom:6px;font-family:Georgia,serif;}
+  .quote-slide .label{color:var(--blue);font-weight:700;font-size:18px;margin-bottom:22px;}
+  .quote-slide .quote{font-size:40.5px;font-weight:800;line-height:1.55;max-width:980px;letter-spacing:-0.3px;}
+
+  /* ---- part cover ---- */
+  .part-cover{display:flex;flex-direction:column;justify-content:center;}
+  .part-cover .num{font-size:22.5px;font-weight:800;color:var(--blue);margin-bottom:18px;}
+  .part-cover.green .num{color:var(--green);}
+  .part-cover.orange .num{color:var(--orange);}
+  .part-cover h1{font-size:58px;font-weight:800;margin:0 0 18px 0;}
+  .part-cover .desc{font-size:21.5px;color:var(--gray-700);max-width:780px;line-height:1.7;}
+
+  /* ---- table ---- */
+  table{width:100%;border-collapse:collapse;font-size:16px;}
+  th{
+    text-align:left;background:#F4F6FA;color:#4B5563;font-weight:700;
+    padding:11px 16px;border-bottom:2px solid #E1E6EE;font-size:15px;
+  }
+  td{padding:12px 16px;border-bottom:1px solid #EDEFF3;color:var(--ink);vertical-align:top;line-height:1.55;}
+  tr:last-child td{border-bottom:none;}
+
+  /* ---- numbered steps ---- */
+  .steps{display:flex;flex-direction:column;gap:16px;}
+  .step{display:flex;gap:18px;align-items:flex-start;}
+  .step .n{
+    flex:none;width:34px;height:34px;border-radius:50%;
+    background:var(--blue);color:#fff;font-weight:800;font-size:17px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .step .n.green{background:var(--green);}
+  .step .n.orange{background:var(--orange);}
+  .step .t{font-weight:700;font-size:18px;margin-bottom:3px;}
+  .step .d{font-size:15.5px;color:var(--gray-700);line-height:1.6;}
+
+  /* ---- prompt compare ---- */
+  .compare2{display:grid;grid-template-columns:1fr 1fr;gap:26px;}
+  .promptbox{border-radius:14px;padding:22px 24px;border:1px solid;}
+  .promptbox.bad{background:var(--red-tint);border-color:var(--red-border);}
+  .promptbox.good{background:var(--green-tint);border-color:var(--green-border);}
+  .promptbox .lbl{font-weight:800;font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .promptbox.bad .lbl{color:var(--red);}
+  .promptbox.good .lbl{color:var(--green);}
+  .promptbox p{font-size:16px;line-height:1.7;margin:0;color:#2B2F36;}
+
+  /* ---- numbered list (templates) ---- */
+  .numlist{display:flex;flex-direction:column;gap:12px;}
+  .numlist .item{display:flex;gap:14px;background:#F8F9FC;border:1px solid var(--gray-300);border-radius:10px;padding:13px 18px;}
+  .numlist .idx{flex:none;font-weight:800;color:var(--blue);font-size:15.5px;}
+  .numlist p{margin:0;font-size:15.5px;color:var(--ink);line-height:1.6;}
+
+  .grid2col{display:grid;grid-template-columns:1.05fr 1fr;gap:34px;align-items:start;}
+</style>
+</head>
+<body>
+
+<!-- 1. TITLE -->
+<section class="slide title-slide">
+  <div class="eyebrow">중학교 교사 대상 특강</div>
+  <h1>바이브코딩으로<br>업무와 수업을 바꾸는 시간</h1>
+  <div class="subtitle">말로 시켜서 일하고, 말로 시켜서 가르치기</div>
+  <div class="pills">
+    <div class="pill">🕐&nbsp; 120분 특강</div>
+    <div class="pill">🧑‍🏫&nbsp; 중학교 교사 대상</div>
+    <div class="pill">💻&nbsp; 노트북 + 브라우저</div>
+  </div>
+</section>
+
+<!-- 2. QUOTE -->
+<section class="slide quote-slide">
+  <div class="qmark">&ldquo;</div>
+  <div class="label">특강을 준비하며 가장 많이 들은 말</div>
+  <div class="quote">저는 코딩을 전혀 모르는데,<br>AI로 뭔가 만들 수 있을까요?</div>
+</section>
+
+<!-- 3. 세 가지 능력 -->
+<section class="slide">
+  <div class="heading"><div class="bar"></div><h1>코딩을 몰라도 오히려 잘 되는 이유</h1></div>
+  <p class="sub">바이브코딩에서 진짜 필요한 것은 문법이 아니라, 선생님이 이미 갖고 있는 세 가지 능력입니다.</p>
+  <div class="cards c3">
+    <div class="card">
+      <div class="icon">💬</div>
+      <h3>말로 설명하는 능력</h3>
+      <p>AI에게 시키려면 원하는 것을 정확히 말해야 합니다. 코딩 문법이 아니라 국어 능력에 가깝습니다.</p>
+    </div>
+    <div class="card">
+      <div class="icon">✅</div>
+      <h3>판단하는 능력</h3>
+      <p>결과가 맞는지 틀린지는 그 교과를 아는 사람만 알아챕니다. 선생님이 바로 그 사람입니다.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔁</div>
+      <h3>다듬는 능력</h3>
+      <p>한 번에 완성하지 않습니다. 대화를 주고받으며 조금씩 원하는 모습으로 바꿔갑니다.</p>
+    </div>
+  </div>
+  <div style="height:22px;"></div>
+  <div class="callout">
+    <div class="ic">💡</div>
+    <div>셋 다 <b>문법 암기가 아니라 생각하는 능력</b>입니다. 코딩을 몰라도 선생님은 이미 이 능력을 갖고 계십니다.</div>
+  </div>
+</section>
+
+<!-- 4. 오해 vs 사실 -->
+<section class="slide">
+  <div class="heading"><div class="bar"></div><h1>바이브코딩, 오해와 사실</h1></div>
+  <p class="sub">시작하기 전에, 흔히 갖는 오해부터 짚고 갑니다.</p>
+  <div class="cards c2">
+    <div class="card orange">
+      <div class="tag">흔한 오해</div>
+      <ul>
+        <li>복잡한 프로그램을 만들려면 코딩을 배워야 한다</li>
+        <li>한 번에 완벽한 결과가 나와야 한다</li>
+        <li>전문가만 쓸 수 있는 도구다</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <div class="tag">실제로는</div>
+      <ul>
+        <li>말로 설명하면 AI가 코드를 대신 씁니다</li>
+        <li>고쳐가며 완성하는 것이 기본 흐름입니다</li>
+        <li>교사가 수업·업무에 바로 쓸 수 있습니다</li>
+      </ul>
+    </div>
+  </div>
+  <div style="height:22px;"></div>
+  <div class="callout green">
+    <div class="ic">🎯</div>
+    <div>오늘의 목표는 <b>"코딩 배우기"가 아니라 "AI에게 정확히 시키는 법 익히기"</b>입니다.</div>
+  </div>
+</section>
+
+<!-- 5. 오늘의 순서 -->
+<section class="slide">
+  <div class="heading"><div class="bar"></div><h1>오늘의 순서</h1></div>
+  <p class="sub">이론은 짧게, 실습은 길게 진행합니다.</p>
+  <div class="cards c3">
+    <div class="card">
+      <div class="tag">PART 01 · 개념</div>
+      <h3>바이브코딩과 기획서</h3>
+      <p>바이브코딩이 무엇인지, 기획서와 프롬프트는 어떻게 쓰는지 익힙니다.</p>
+    </div>
+    <div class="card orange">
+      <div class="tag">PART 02 · 실습</div>
+      <h3>업무 효율화</h3>
+      <p>반복되는 행정 업무를 줄여주는 도구를 직접 만들어봅니다.</p>
+    </div>
+    <div class="card green">
+      <div class="tag">PART 03 · 실습</div>
+      <h3>수업 활용</h3>
+      <p>학생 참여형 수업 자료를 직접 만들어봅니다.</p>
+    </div>
+  </div>
+  <div style="height:22px;"></div>
+  <div class="callout">
+    <div class="ic">ℹ️</div>
+    <div>실습은 노트북과 브라우저만 있으면 됩니다. <b>Claude.ai 또는 ChatGPT 계정</b>을 미리 만들어 오시면 더 좋습니다.</div>
+  </div>
+</section>
+
+<!-- 6. PART 01 COVER -->
+<section class="slide part-cover">
+  <div class="num">PART 01</div>
+  <h1>개념과 기획서</h1>
+  <div class="desc">바이브코딩이 무엇이고, 좋은 결과물을 얻으려면 무엇을 먼저 준비해야 하는지 살펴봅니다.</div>
+</section>
+
+<!-- 7. 바이브코딩이란 -->
+<section class="slide">
+  <div class="heading"><div class="bar"></div><h1>코드를 직접 안 쓰고, 말로 짓습니다</h1></div>
+  <p class="sub">바이브코딩(Vibe Coding)은 원하는 것을 자연어로 설명하면 AI가 코드를 작성하고 실행까지 해주는 방식입니다.</p>
+  <table>
+    <tr><th style="width:22%;"></th><th>기존 코딩</th><th>바이브코딩</th></tr>
+    <tr><td><b>필요한 지식</b></td><td>프로그래밍 문법</td><td>요구사항을 말로 설명하는 능력</td></tr>
+    <tr><td><b>속도</b></td><td>느림 (문법 학습 필요)</td><td>빠름 (즉시 결과 확인)</td></tr>
+    <tr><td><b>수정 방법</b></td><td>코드를 직접 수정</td><td>"이 부분 이렇게 바꿔줘"라고 대화로 요청</td></tr>
+  </table>
+  <div style="height:22px;"></div>
+  <div class="callout">
+    <div class="ic">🔑</div>
+    <div>핵심 전환은 <b>"어떻게 코딩할까"에서 "무엇을 만들고 싶은가"로</b> 옮겨가는 것입니다.</div>
+  </div>
+</section>
+
+<!-- 8. 대표 도구 -->
+<section class="slide">
+  <div class="heading"><div class="bar"></div><h1>오늘 쓸 도구는 하나면 충분합니다</h1></div>
+  <p class="sub">교사가 별도 설치 없이 바로 접근할 수 있는 대화형 AI 도구를 사용합니다.</p>
+  <div class="cards c2">
+    <div class="card">
+      <div class="icon">✳️</div>
+      <h3>Claude.ai</h3>
+      <p>대화창에서 바로 문서·웹페이지·간단한 앱 같은 결과물을 만들고 그 자리에서 확인할 수 있습니다.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🤖</div>
+      <h3>ChatGPT</h3>
+      <p>비슷한 방식으로 동작하며, Canvas 기능으로 만든 결과물을 이어서 편집할 수 있습니다.</p>
+    </div>
+  </div>
+  <div style="height:22px;"></div>
+  <div class="callout">
+    <div class="ic">📌</div>
+    <div>오늘 실습은 위 도구 중 <b>하나만</b> 사용합니다. 도구보다 <b>요청하는 방법</b>이 오늘의 핵심입니다.</div>
+  </div>
+</section>
+
+<!-- 9. 프롬프트 5원칙 -->
+<section class="slide">
+  <div class="heading"><div class="bar"></div><h1>좋은 프롬프트의 5원칙</h1></div>
+  <p class="sub">이 다섯 가지만 채우면 프롬프트의 질이 크게 좋아집니다.</p>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><div><div class="t">역할</div><div class="d">AI에게 어떤 역할을 맡기는가 — "너는 중학교 과학 교사야"</div></div></div>
+    <div class="step"><div class="n">2</div><div><div class="t">목적</div><div class="d">무엇을 위해 만드는가 — "학생이 스스로 점검할 자료를 위해"</div></div></div>
+    <div class="step"><div class="n">3</div><div><div class="t">조건 · 제약</div><div class="d">꼭 지켜야 할 것 — 분량, 난이도, 학년, 형식 등</div></div></div>
+    <div class="step"><div class="n">4</div><div><div class="t">예시</div><div class="d">원하는 결과와 비슷한 예시를 함께 제시</div></div></div>
+    <div class="step"><div class="n">5</div><div><div class="t">출력 형식</div><div class="d">표, 웹페이지, 목록 등 결과물이 어떤 모양이어야 하는지</div></div></div>
+  </div>
+</section>
+
+<!-- 10. 나쁜/좋은 프롬프트 -->
+<section class="slide">
+  <div class="heading"><div class="bar"></div><h1>같은 요청, 다른 프롬프트</h1></div>
+  <p class="sub">다섯 가지 원칙을 적용하면 프롬프트가 이렇게 달라집니다.</p>
+  <div class="compare2">
+    <div class="promptbox bad">
+      <div class="lbl">✕ 나쁜 프롬프트</div>
+      <p>"학생용 퀴즈 만들어줘"</p>
+    </div>
+    <div class="promptbox good">
+      <div class="lbl">✓ 좋은 프롬프트</div>
+      <p>"너는 중학교 2학년 과학 교사야. '광합성' 단원을 배운 학생들이 스스로 점검할 수 있는 5문항 객관식 퀴즈를 웹페이지로 만들어줘. 난이도는 중2 수준, 정답 확인 시 간단한 해설이 나오게 해줘. 클릭 가능한 웹페이지로 줘."</p>
+    </div>
+  </div>
+  <div style="height:22px;"></div>
+  <div class="callout">
+    <div class="ic">✏️</div>
+    <div>역할·목적·조건·형식이 들어가면, 결과물의 방향이 훨씬 정확해집니다.</div>
+  </div>
+</section>
+
+<!-- 11. 기획서 템플릿 -->
+<section class="slide">
+  <div class="heading"><div class="bar"></div><h1>5분이면 되는 기획서 템플릿</h1></div>
+  <p class="sub">바이브코딩 전에 아래 표를 채우면 프롬프트 품질이 크게 좋아집니다.</p>
+  <table>
+    <tr><th style="width:20%;">항목</th><th style="width:38%;">채우는 내용</th><th>예시</th></tr>
+    <tr><td><b>목적</b></td><td>왜 만드는가</td><td>학생 자기평가용 퀴즈 제공</td></tr>
+    <tr><td><b>사용자</b></td><td>누가 쓰는가</td><td>중2 과학 수업 학생</td></tr>
+    <tr><td><b>핵심 기능</b></td><td>꼭 있어야 할 기능</td><td>5문항, 정답 확인, 해설</td></tr>
+    <tr><td><b>입력 / 출력</b></td><td>무엇을 넣고 무엇이 나오는가</td><td>답 선택 → 점수·해설 표시</td></tr>
+    <tr><td><b>제약조건</b></td><td>지켜야 할 것</td><td>중2 수준 어휘, 5분 내 완료</td></tr>
+    <tr><td><b>형식</b></td><td>결과물의 형태</td><td>웹페이지(HTML)</td></tr>
+  </table>
+  <div style="height:20px;"></div>
+  <div class="callout green">
+    <div class="ic">💡</div>
+    <div>이 표를 그대로 문장으로 이어 붙이면 <b>훌륭한 프롬프트</b>가 됩니다.</div>
+  </div>
+</section>
+
+<!-- 12. PART 02 COVER -->
+<section class="slide part-cover orange">
+  <div class="num">PART 02</div>
+  <h1>업무 효율화 실습</h1>
+  <div class="desc">반복적인 행정·수업 준비 업무를 줄여주는 도구를 직접 만들어봅니다.</div>
+</section>
+
+<!-- 13. 실습1 과제 -->
+<section class="slide">
+  <div class="heading orange"><div class="bar"></div><h1>실습 1 · 업무 효율화 (30분)</h1></div>
+  <p class="sub">아래 세 과제 중 하나를 선택해 진행합니다. 담당 업무에 맞게 자유롭게 바꿔도 좋습니다.</p>
+  <div class="cards c3">
+    <div class="card orange">
+      <div class="icon">✉️</div>
+      <h3>가정통신문 생성기</h3>
+      <p>학년·주제를 입력하면 가정통신문 초안 문구를 만들어주는 도구</p>
+    </div>
+    <div class="card orange">
+      <div class="icon">📋</div>
+      <h3>상담일지 요약 도구</h3>
+      <p>긴 상담 기록을 핵심 요약과 후속 조치 제안으로 정리</p>
+    </div>
+    <div class="card orange">
+      <div class="icon">📝</div>
+      <h3>시험 문항 뱅크</h3>
+      <p>단원명을 입력하면 객관식 문항 여러 개를 자동 생성</p>
+    </div>
+  </div>
+</section>
+
+<!-- 14. 실습1 순서 -->
+<section class="slide">
+  <div class="heading orange"><div class="bar"></div><h1>실습 1 진행 순서 (20분 실습 + 10분 공유)</h1></div>
+  <div class="grid2col">
+    <div class="steps">
+      <div class="step"><div class="n orange">1</div><div><div class="t">기획서 작성 (3분)</div><div class="d">앞의 기획서 템플릿을 실제로 채웁니다.</div></div></div>
+      <div class="step"><div class="n orange">2</div><div><div class="t">프롬프트 작성 (5분)</div><div class="d">채운 내용을 바탕으로 프롬프트를 씁니다.</div></div></div>
+      <div class="step"><div class="n orange">3</div><div><div class="t">결과 확인 (5분)</div><div class="d">Claude.ai(또는 ChatGPT)에 입력하고 결과를 확인합니다.</div></div></div>
+      <div class="step"><div class="n orange">4</div><div><div class="t">수정 요청 (5분)</div><div class="d">"문항을 더 쉽게 바꿔줘"처럼 추가 요청으로 다듬습니다.</div></div></div>
+      <div class="step"><div class="n orange">5</div><div><div class="t">공유 (2분)</div><div class="d">옆 선생님과 결과물을 보여주고 피드백을 나눕니다.</div></div></div>
+    </div>
+    <div class="callout orange" style="align-self:stretch;">
+      <div class="ic">🎓</div>
+      <div><b>진행자 팁</b><br><br>처음 결과가 완벽하지 않아도 괜찮다는 것을 먼저 안내해주세요. "한 번에 완성"이 아니라 <b>"대화하며 다듬기"</b>가 바이브코딩의 핵심입니다.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 15. PART 03 COVER -->
+<section class="slide part-cover green">
+  <div class="num">PART 03</div>
+  <h1>수업 활용 실습</h1>
+  <div class="desc">담당 교과 수업에 바로 쓸 수 있는 학생 참여형 자료를 직접 만들어봅니다.</div>
+</section>
+
+<!-- 16. 실습2 과제 -->
+<section class="slide">
+  <div class="heading green"><div class="bar"></div><h1>실습 2 · 수업 활용 (30분)</h1></div>
+  <p class="sub">담당 교과에 맞춰 자유롭게 변형해도 좋습니다.</p>
+  <div class="cards c3">
+    <div class="card green">
+      <div class="icon">❓</div>
+      <h3>인터랙티브 퀴즈</h3>
+      <p>단원 개념을 점검하는 클릭형 웹페이지 퀴즈</p>
+    </div>
+    <div class="card green">
+      <div class="icon">⏱️</div>
+      <h3>모둠 타이머 · 점수판</h3>
+      <p>모둠활동 시간을 관리하고 점수를 기록하는 도구</p>
+    </div>
+    <div class="card green">
+      <div class="icon">🔬</div>
+      <h3>개념 시뮬레이션</h3>
+      <p>물체의 운동, 도형 변환, 어휘 매칭 등 교과 특성에 맞는 시각 자료</p>
+    </div>
+  </div>
+</section>
+
+<!-- 17. 실습2 순서 -->
+<section class="slide">
+  <div class="heading green"><div class="bar"></div><h1>실습 2 진행 순서 (동일한 4단계 반복)</h1></div>
+  <div class="grid2col">
+    <div class="steps">
+      <div class="step"><div class="n green">1</div><div><div class="t">기획서 작성</div><div class="d">이번엔 "학년 · 학생 수준 · 수업 시간"을 반드시 포함합니다.</div></div></div>
+      <div class="step"><div class="n green">2</div><div><div class="t">프롬프트 작성</div><div class="d">기획서 내용을 문장으로 옮깁니다.</div></div></div>
+      <div class="step"><div class="n green">3</div><div><div class="t">결과 생성 및 확인</div><div class="d">만들어진 자료가 실제 수업에 맞는지 확인합니다.</div></div></div>
+      <div class="step"><div class="n green">4</div><div><div class="t">수정 요청</div><div class="d">"색깔 바꿔줘", "문항 수 줄여줘" 등으로 다듬습니다.</div></div></div>
+    </div>
+    <div class="callout green" style="align-self:stretch;">
+      <div class="ic">👥</div>
+      <div><b>공유 시간 (5분)</b><br><br>만든 결과물을 화면 공유로 1~2명 발표하고, 실제 수업에서 어떻게 활용할지 아이디어를 나눕니다.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 18. 대화형 수정 요청 노하우 -->
+<section class="slide">
+  <div class="heading"><div class="bar"></div><h1>대화형 수정 요청 노하우</h1></div>
+  <p class="sub">기획서 6단계(목적·사용자·핵심기능·입력출력·제약조건·우선순위)를 채웠다면, 이제 대화로 다듬는 법입니다.</p>
+  <div class="cards c3">
+    <div class="card">
+      <div class="icon">🧩</div>
+      <h3>단계적으로 요청</h3>
+      <p>한 번에 다 요구하지 않습니다. "일단 기본 틀부터 만들어줘" → "여기에 ○○ 기능 추가해줘"</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔍</div>
+      <h3>원인부터 확인</h3>
+      <p>결과가 이상할 땐 "왜 이렇게 나왔는지 설명해줘"라고 물은 뒤 재요청합니다.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🎯</div>
+      <h3>부분만 수정</h3>
+      <p>"다른 건 그대로 두고 3번 문항만 바꿔줘"처럼 유지할 부분을 명시합니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 19. 트러블슈팅 -->
+<section class="slide">
+  <div class="heading"><div class="bar"></div><h1>결과가 마음에 안 들 때</h1></div>
+  <p class="sub">실습 중 자주 마주치는 상황과 대처법입니다.</p>
+  <table>
+    <tr><th style="width:34%;">상황</th><th>대처법</th></tr>
+    <tr><td>결과가 너무 어렵거나 쉬움</td><td>"난이도를 ○학년 수준으로 다시 맞춰줘"라고 재요청</td></tr>
+    <tr><td>원하는 기능이 빠짐</td><td>"여기에 ○○ 기능을 추가해줘"라고 구체적으로 요청</td></tr>
+    <tr><td>결과물이 너무 복잡함</td><td>"더 간단하게, 핵심만 남겨줘"라고 요청</td></tr>
+    <tr><td>전혀 다른 결과가 나옴</td><td>기획서(목적·사용자·기능)를 다시 확인하고 빠진 조건이 있는지 점검</td></tr>
+  </table>
+</section>
+
+<!-- 20. 부록 업무 템플릿 -->
+<section class="slide">
+  <div class="heading orange"><div class="bar"></div><h1>부록 · 업무용 프롬프트 템플릿</h1></div>
+  <p class="sub">특강 이후에도 바로 활용할 수 있는 문장 템플릿입니다.</p>
+  <div class="numlist">
+    <div class="item"><div class="idx">1</div><p>너는 [교과] 교사야. [업무명]을 위한 [결과물]을 만들어줘. 조건: [조건]. 형식: [형식]으로.</p></div>
+    <div class="item"><div class="idx">2</div><p>다음 [자료/기록]을 요약해서 핵심 사항과 후속 조치를 표로 정리해줘: [내용 붙여넣기]</p></div>
+    <div class="item"><div class="idx">3</div><p>[학년] 학생 대상 [주제] 가정통신문 초안을 [문체]로 작성해줘. 분량은 [분량].</p></div>
+    <div class="item"><div class="idx">4</div><p>[단원명] 관련 객관식 문항 [개수]개를 난이도 [상/중/하]로 만들어줘. 정답과 해설도 포함해줘.</p></div>
+    <div class="item"><div class="idx">5</div><p>이 엑셀/데이터를 보고 [분석 목적]에 맞게 표와 간단한 그래프로 정리해줘: [데이터 붙여넣기]</p></div>
+  </div>
+</section>
+
+<!-- 21. 부록 수업 템플릿 -->
+<section class="slide">
+  <div class="heading green"><div class="bar"></div><h1>부록 · 수업용 프롬프트 템플릿</h1></div>
+  <p class="sub">담당 교과에 맞게 대괄호 부분만 바꿔서 사용하세요.</p>
+  <div class="numlist">
+    <div class="item"><div class="idx">1</div><p>[학년] [교과] '[단원명]' 개념을 점검하는 [문항 수]문항 인터랙티브 퀴즈를 웹페이지로 만들어줘. 정답 확인 시 해설이 나오게 해줘.</p></div>
+    <div class="item"><div class="idx">2</div><p>모둠활동용 타이머와 점수판을 웹페이지로 만들어줘. 모둠 수는 [개수], 점수는 클릭으로 올릴 수 있게 해줘.</p></div>
+    <div class="item"><div class="idx">3</div><p>[개념]을 시각적으로 이해할 수 있는 간단한 시뮬레이션을 만들어줘. 학생이 값을 바꾸면 결과가 바로 바뀌게 해줘.</p></div>
+    <div class="item"><div class="idx">4</div><p>[단원명] 관련 어휘 매칭 게임을 웹페이지로 만들어줘. [학년] 수준에 맞는 어휘 [개수]개로.</p></div>
+    <div class="item"><div class="idx">5</div><p>오늘 배운 [개념]을 정리하는 학생용 자기평가 체크리스트를 만들어줘.</p></div>
+  </div>
+</section>
+
+<!-- 22. 한 장 요약 -->
+<section class="slide">
+  <div class="heading"><div class="bar"></div><h1>한 장 요약</h1></div>
+  <p class="sub">오늘 다룬 세 가지 능력이 업무와 수업에서 각각 이렇게 쓰입니다.</p>
+  <table>
+    <tr><th style="width:22%;">필요한 능력</th><th>업무 효율화에서</th><th>수업 활용에서</th></tr>
+    <tr><td><b>말로 표현하는 능력</b></td><td>원하는 문서·자료를 문장으로 정확히 지시</td><td>학생 수준·수업 시간을 조건으로 명시</td></tr>
+    <tr><td><b>판단하는 능력</b></td><td>결과가 실제 업무에 쓸 만한지 확인</td><td>교과 오개념 없이 정확한지 확인</td></tr>
+    <tr><td><b>다듬는 능력</b></td><td>수정 요청을 반복해 완성도를 높임</td><td>발문·난이도를 조정해 수업에 맞춤</td></tr>
+  </table>
+  <div style="height:22px;"></div>
+  <div class="callout">
+    <div class="ic">🌱</div>
+    <div>결국 바이브코딩에서 가장 중요한 것은 도구가 아니라, <b>선생님이 이미 갖고 있는 이 세 가지 능력</b>입니다.</div>
+  </div>
+</section>
+
+<!-- 23. CLOSING -->
+<section class="slide">
+  <div class="heading"><div class="bar"></div><h1>당장 해볼 수 있는 것</h1></div>
+  <p class="sub">준비물은 브라우저와 생성형 AI 하나가 전부입니다. 설치도 서버도 필요 없습니다.</p>
+  <div class="cards c3">
+    <div class="card">
+      <div class="tag">10분</div>
+      <h3>기획서 하나 써보기</h3>
+      <p>다음 수업이나 업무 중 하나를 골라 기획서 템플릿 6칸을 채워봅니다.</p>
+    </div>
+    <div class="card">
+      <div class="tag">5분</div>
+      <h3>프롬프트로 옮겨보기</h3>
+      <p>채운 기획서를 문장으로 이어 붙여 프롬프트를 완성합니다.</p>
+    </div>
+    <div class="card">
+      <div class="tag">첫걸음</div>
+      <h3>AI에게 요청해보기</h3>
+      <p>Claude.ai 또는 ChatGPT에 붙여넣고, 결과를 보며 한 번만 더 다듬어봅니다.</p>
+    </div>
+  </div>
+  <div style="height:22px;"></div>
+  <div class="callout">
+    <div class="ic">🙌</div>
+    <div>오늘 배운 것은 결국 <b>"AI에게 정확히 부탁하는 법"</b>입니다. 막히는 부분은 언제든 질문해 주세요.</div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll('.slide').forEach(function(s, i){
+    var d = document.createElement('div');
+    d.className = 'page-num';
+    d.textContent = (i+1);
+    s.appendChild(d);
+
+    // 화면에서 슬라이드 한 장이 한 화면(뷰포트)에 꽉 차 보이도록 래퍼로 감싼다.
+    // 인쇄/PDF 출력에는 영향이 없다 (frame은 print 시 display:contents 처리됨).
+    var frame = document.createElement('div');
+    frame.className = 'frame';
+    s.parentNode.insertBefore(frame, s);
+    frame.appendChild(s);
+  });
+
+  function updateFitScale(){
+    var scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    document.documentElement.style.setProperty('--fit-scale', scale);
+  }
+  window.addEventListener('resize', updateFitScale);
+  updateFitScale();
+</script>
+</body>
+</html>
