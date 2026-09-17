@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학생용 선생님 호출 앱</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; }
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;}
+        .teacher-btn { padding: 15px; border-radius: 8px; border: 1px solid #ccc; font-weight: bold; cursor: pointer; }
+        .status-업무중 { background-color: #e8f5e9; border-color: #4caf50; }
+        .status-자리비움 { background-color: #fff3e0; border-color: #ff9800; color: #d84315; }
+        .status-퇴근 { background-color: #f5f5f5; color: #9e9e9e; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <h2>교무실 방문 / 호출</h2>
+    <div>
+        <input type="text" id="studentId" placeholder="학번" style="width: 30%;">
+        <input type="text" id="studentName" placeholder="이름" style="width: 40%;">
+    </div>
+
+    <div id="seatingChart" class="grid-layout">
+        <!-- 서버로부터 자리배치도를 받아와 자동으로 그려집니다 -->
+        <p>선생님 정보를 불러오는 중...</p>
+    </div>
+
+    <div id="callForm" style="display:none; margin-top: 30px; background: #f0f8ff; padding: 15px; border-radius: 8px;">
+        <h3 id="selectedTeacherName"></h3>
+        <textarea id="purpose" style="width: 100%; height: 60px;" placeholder="방문 목적을 적어주세요."></textarea>
+        <button onclick="callTeacher()" style="width: 100%; padding: 10px; margin-top: 10px; background: #2196F3; color:white; border:none; border-radius: 5px;">선생님 호출하기</button>
+    </div>
+
+    <script>
+        const socket = io("http://localhost:3000");
+        let currentTargetId = "";
+
+        // 서버에서 선생님 데이터와 자리배치도를 수신
+        socket.on('sync_data', (data) => {
+            const chart = document.getElementById("seatingChart");
+            chart.innerHTML = ""; // 기존 화면 초기화
+
+            if (data.layout.length === 0) {
+                chart.innerHTML = "<p>아직 관리자가 자리배치를 완료하지 않았습니다.</p>";
+                return;
+            }
+
+            // 관리자가 설정한 레이아웃 순서대로 버튼 생성
+            data.layout.forEach(teacherId => {
+                const btn = document.createElement("button");
+                
+                if (teacherId && data.teachers[teacherId]) {
+                    const t = data.teachers[teacherId];
+                    btn.className = `teacher-btn status-${t.status.split(' ')[0]}`; // 상태에 따라 색상 클래스 적용
+                    btn.innerHTML = `${t.name} 선생님<br><span style="font-size:0.8em; font-weight:normal;">${t.status}</span>`;
+                    
+                    if (t.status === '업무중') {
+                        btn.onclick = () => selectTeacher(teacherId, t.name);
+                    } else {
+                        btn.onclick = () => alert(`${t.name} 선생님은 현재 '${t.status}' 상태이므로 호출할 수 없습니다.`);
+                    }
+                } else {
+                    // 빈 자리
+                    btn.className = "teacher-btn";
+                    btn.style.background = "transparent";
+                    btn.style.border = "1px dashed #ccc";
+                    btn.innerText = "빈 자리";
+                    btn.disabled = true;
+                }
+                chart.appendChild(btn);
+            });
+        });
+
+        function selectTeacher(teacherId, teacherName) {
+            currentTargetId = teacherId;
+            document.getElementById("selectedTeacherName").innerText = `👉 ${teacherName} 선생님 호출`;
+            document.getElementById("callForm").style.display = "block";
+        }
+
+        function callTeacher() {
+            const stuId = document.getElementById("studentId").value;
+            const stuName = document.getElementById("studentName").value;
+            const purpose = document.getElementById("purpose").value;
+
+            if(!stuId || !stuName || !purpose) return alert("학번, 이름, 목적을 입력하세요.");
+
+            socket.emit("call_teacher", { studentId: stuId, studentName: stuName, targetTeacherId: currentTargetId, purpose: purpose });
+            alert("호출 완료!");
+            document.getElementById("callForm").style.display = "none";
+            document.getElementById("purpose").value = "";
+        }
+    </script>
+</body>
+</html>
